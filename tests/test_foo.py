@@ -23,7 +23,8 @@ def test_foo_spam_get_words_01():
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import WordSpam'.
     """
-    # patch.object() 'my_module.things.random.choices()' in a context manager
+    # Normally WordSpam().get_words() returns **random words**, but we want to
+    # force it to return a predictable word list() so usage is testable...
     with patch.object(my_module.things.random, "choices") as mock_choices:
         # Yes         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ <- A) Do THIS!!!
         # Mock the return value of 'random.choices()' in 'my_module.things'
@@ -44,7 +45,8 @@ def test_foo_spam_get_words_02():
     This is not as good as 'test_foo_spam_get_words_01()' above because this is
     not testing anything in '../foo.py'.
     """
-    ## Yes
+    # Normally WordSpam().get_words() returns **random words**, but we want to
+    # force it to return a predictable word list() so usage is testable...
     with patch("my_module.things.random.choices") as mock_choices:
         # Yes  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ <- A) Do THIS!!!
         # Mock the return value of 'random.choices()' in 'my_module.things'
@@ -87,7 +89,7 @@ def test_wordspam_04():
     to return a certain value.
     """
     # Normally WordSpam().get_words() returns **random words**, but we want to
-    # force it to return a predictable word list() so usage is predictable...
+    # force it to return a predictable word list() so usage is testable...
     with patch("my_module.things.WordSpam.get_words", return_value=["fish", "dish"]):
         # Ick  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         spam = WordSpam()
@@ -107,7 +109,7 @@ def test_wordspam_05_antipattern():
     ## Try NOT to directly path python stdlib... you have no test case
     ## isolation when patching python stdlib directly...
     with patch("random.choices") as mock_random_choices:
-        # No   ^^^^^^^^^^^^^^^^ <- avoid this!!
+        # No   ^^^^^^^^^^^^^^^^ <- avoid directly patching python stdlib!
         mock_random_choices.return_value = ["fish", "dish"]
         spam = WordSpam()
         assert spam.get_words(0) == ["fish", "dish"]
