@@ -5,7 +5,7 @@ This example walks through various ways to optimize how unit tests are built.
 Everything in the `tests/*.py` code hinges on where we patch code under test.
 
 - Patching `random.choices()` is best in this example.  It provides predictable
-  values which can be tested against. By patching `random.choices()`, we can test
+  values which can be tested against. By patching `random.choices()`, I can test
   almost all code in `get_words()`.
 - Patching `WordSpam().get_words()` is not as good; this is because it bypasses 
   tests of the logic contained in `get_words()`.
@@ -14,8 +14,8 @@ See the docstrings and tests in `tests/test_foo.py` for more concrete explanatio
 
 ### Code under test
 
-The following code is all of what we are testing; it's quite trivial, which is good 
-for the purposes of this example.
+The following code is all of what I want to test; `WordSpam()` is quite trivial, 
+which is good for the purposes of this example.
 
 ```python
 # Filename: my_module/things.py
@@ -58,9 +58,20 @@ class WordSpam(object):
 
 ### Unittest code
 
-This is one of a few ways to test the code in `my_module/things.py`.
+The following is one of a few ways to test the code in `my_module/things.py`.
+One of the most problematic things about testing `WordSpam().get_words()` is
+that it picks words at random.  The random behavior makes it impossible
+to build good unit tests... my best recourse is patching `WordSpam()` such
+that it is predictable.
 
-Assume that we put this in `tests/test_foo.py`.
+I get around this problem by patching `random.choices()` to only return
+values I expect.
+
+The following tests patch `random.choices()` in `my_module/things.py`
+such that `random.choices()` returns a list of strings that I picked
+so I know what `random.choices()` will return (in the unit tests).
+
+Assume that we put the following in `tests/test_foo.py`.
 
 ```python
 import sys
@@ -78,17 +89,15 @@ import random
 
 def test_foo_spam_get_words_01():
     """
-    The best option (because it doesn't use magical syntax)...
-    use a 'with patch.object()' context manager to patch 'random.choices()'
-    inside 'my_module/things.py' and then 'import foo'.  This works because
-    we patch 'random.choices()' inside 'my_module/things.py' **before**
-    'import foo'.
+    I think a python context manager is the best unit test option... this test
+    function uses the `with patch.object()` context manager to patch
+    `random.choices()` inside `my_module/things.py`... then I `import foo`
+    (which uses `WordSpam()`).  This works because we patch `random.choices()`
+    inside `my_module/things.py` **before** I `import foo`.
 
-    Normally WordSpam().get_words() returns **random words**, but we want to
-    force it to return a predictable word list() so usage is testable...
-
-    'foo.py' uses 'random.choices()' when it calls
-    'from my_module.things import WordSpam'.
+    Normally `WordSpam().get_words()` returns **random words**, but this
+    `patch()` forces it to return a predictable `list` of words... consequently
+    this makes `WordSpam()` predictable and thus, testable...
     """
     with patch.object(my_module.things.random, "choices") as mock_choices:
         # Yes         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ <- A) Do THIS!!!
@@ -103,7 +112,7 @@ def test_foo_spam_get_words_01():
         # 'del foo' offers MAXIMUM test assert isolation...
         del foo
 
-def test_foo_spam_get_words_01():
+def test_foo_spam_get_words_02():
     """
     Another way to only test `WordSpam().get_words()`...
     """
