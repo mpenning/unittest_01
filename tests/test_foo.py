@@ -1,8 +1,5 @@
-from unittest.mock import patch, MagicMock
-from unittest import mock, TestCase
-import random
-import sys
 
+import sys
 sys.path.insert(0, "../")
 
 # Even though we only import WordSpam(), python can access 'my_module.things'
@@ -12,11 +9,15 @@ from my_module.things import WordSpam
 # for the 'with patch.object()' call below...
 import my_module.things
 
+from unittest.mock import patch
+from unittest import TestCase
+import random
+
 def test_foo_spam_get_words_01():
     """
-    The very BEST option which has the least amount of magic syntax...
-    use a @patch.object() context manager to patch 'random.choices()' inside
-    'my_module/things.py' and then 'import foo'.  This works because
+    The very BEST option (because it doesn't use magical syntax)...
+    use a 'with patch.object()' context manager to patch 'random.choices()'
+    inside 'my_module/things.py' and then 'import foo'.  This works because
     we patch 'random.choices()' inside 'my_module/things.py' **before**
     'import foo'.
 
@@ -40,10 +41,17 @@ def test_foo_spam_get_words_01():
 
 def test_foo_spam_get_words_02():
     """
-    The BETTER option... patch 'random.choices()' inside 'my_module.things'
+    The RATHER GOOD option... patch 'random.choices()' inside
+    'my_module/things.py' and then 'import foo'.  This works because
+    we patch 'random.choices()' inside 'my_module/things.py' 
+    **before** 'import foo'.
 
-    This is not as good as 'test_foo_spam_get_words_01()' above because this is
-    not testing anything in '../foo.py'.
+    'foo.py' uses 'random.choices()' when it calls
+    'from my_module.things import WordSpam'.
+
+    I like 'with patch()' as a context manager instead of an '@patch()'
+    wrapper.  The 'with patch()' context manager has less magical
+    syntax compared with an '@patch()' wrapper.
     """
     # Normally WordSpam().get_words() returns **random words**, but we want to
     # force it to return a predictable word list() so usage is testable...
@@ -52,16 +60,20 @@ def test_foo_spam_get_words_02():
         # Mock the return value of 'random.choices()' in 'my_module.things'
         mock_choices.return_value = ["fish", "dish"]
 
-        spam = WordSpam()
-        assert spam.get_words(0) == ["fish", "dish"]
+        # Import ../foo.py after patching 'my_module.things.random.choices()'
+        import foo
+        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
+        # We are testing WordSpam().get_words() inside 'foo.py'...
+        assert foo.spam.get_words() == ["fish", "dish"]
+        # 'del foo' offers MAXIMUM test assert isolation...
+        del foo
 
 @patch("my_module.things.random.choices")
 def test_foo_spam_get_words_03(mock_choices):
     # A virtual parameter      ^^^^^^^^^^^^
     #
     # @patch('my_module.things.random.choices') inserts a virtual
-    # parameter above (which I call 'mock_choices') in
-    # 'test_foo_spam_get_words()'.
+    # parameter above (which I call 'mock_choices')
     """
     The GOOD option... patch 'random.choices()' inside 'my_module/things.py'
     and then 'import foo'.  This works because we patch 'random.choices()'
@@ -69,6 +81,13 @@ def test_foo_spam_get_words_03(mock_choices):
 
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import WordSpam'.
+
+    When compared with 'test_foo_spam_get_words_01()' and
+    'test_foo_spam_get_words_02()', I don't like this option because
+    of some of the "magical" syntax associated with '@patch()'...
+    specifically the 'mock_choices' parameter that goes with '@patch()'.
+    The 'with patch()' context manager doesn't need the magical
+    'mock_choices' parameter that '@patch()' requires.
     """
     # here we mock 'my_module.things.random.choices()'...
     mock_choices.return_value = ["fish", "dish"]
@@ -98,13 +117,12 @@ def test_wordspam_04():
 
 def test_wordspam_05_antipattern():
     """
-    Always avoid patching the python stdlib directly; in this case, do NOT
-    patch stdlib 'random.choices()'.  Patch it locally in your own module
-    (for the best option, refer to 'test_foo_spam_get_words_01()' above...
+    Ick... Avoid patching the python stdlib directly; in this antipattern, we
+    patch stdlib 'random.choices()'.  It's better to patch it locally in your own
+    module (for the best option, refer to 'test_foo_spam_get_words_01()' above...
 
-    Globally patching 'random.choices()' is considered an patch / mock
-    antipattern, because it globally patches python stdlib 'random.choices()'.
-    Always try to patch as close to the user method as possible.
+    Globally patching 'random.choices()' is considered a patch / mock
+    antipattern, because it patches python stdlib 'random.choices()' everywhere.
     """
     ## Try NOT to directly path python stdlib... you have no test case
     ## isolation when patching python stdlib directly...
@@ -114,20 +132,50 @@ def test_wordspam_05_antipattern():
         spam = WordSpam()
         assert spam.get_words(0) == ["fish", "dish"]
 
-
 @patch("my_module.things.random.choices", return_value=["fish", "dish"])
 # Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-class TestRandomChoices(TestCase):
+class GoodTestRandomChoices_01(TestCase):
+    """
+    Good example.  Why?  Because we are testing maximum code in
+    'WordSpam().get_words()'.  This patches in the best way... it
+    changes 'my_module.things.random.choices()' (which is used by
+    'WordSpam().get_words()')to return fixed (i.e.  non-random) values.
+
+    Refer to the '@patch()' wrapper above to see where the patch is applied.
+    """
 
     def setUp(self):
         pass
 
-    def test_wordspam_01(self, *args, **kwargs):
+    def test_foo_spam_get_words_06(self, *args, **kwargs):
+        spam = WordSpam()
+        assert spam.get_words(0) == ["fish", "dish"]
+
+    def tearDown(self):
+        pass
+
+
+@patch("my_module.things.random.choices", return_value=["fish", "dish"])
+# Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+class GoodTestRandomChoices_02(TestCase):
+    """
+    Good example.  Why?  Because we are testing maximum code in
+    'WordSpam().get_words()'.  This patches in the best way... it
+    changes 'my_module.things.random.choices()' (which is used by
+    'WordSpam().get_words()')to return fixed (i.e.  non-random) values.
+
+    Refer to the '@patch()' wrapper above to see where the patch is applied.
+    """
+
+    def setUp(self):
+        pass
+
+    def test_foo_spam_get_words_07(self, *args, **kwargs):
         """Test 'WordSpam().get_words()' directly in ../foo.py"""
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
-        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
-        # We are testing WordSpam().get_words() inside 'foo.py'...
+        # 'spam' is an instance of 'my_module.things.WordSpam()' in ../foo.py.
+        # We are testing WordSpam().get_words() inside '../foo.py'...
         assert foo.spam.get_words() == ["fish", "dish"]
         # 'del foo' offers MAXIMUM test assert isolation...
         del foo
@@ -137,13 +185,25 @@ class TestRandomChoices(TestCase):
 
 @patch("my_module.things.WordSpam.get_words", return_value=["fish", "dish"])
 # Ick: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-class TestWordSpamAntipattern(TestCase):
+class IckyTestWordSpam(TestCase):
+    """
+    Ick... this is gross.  Why?  Because we are barely testing anything in
+    'WordSpam().get_words()'.  All we did is mock 'WordSpam().get_words()'
+    to return a certain value.
+
+    The 'GoodTestRandomChoices_02()' class above patches in the best way... it
+    changes 'my_module.things.random.choices()' to return fixed (i.e.
+    non-random) values.
+
+    This class also returns fixed values, but it does so by testing much
+    less code in 'WordSpam()'.
+    """
 
     def setUp(self):
         pass
 
-    def test_wordspam_01(self, *args, **kwargs):
-        """Test 'WordSpam().get_words()' directly (i.e. not in '../foo.py')"""
+    def test_foo_spam_get_words_08(self, *args, **kwargs):
+        """Test 'WordSpam().get_words()' (i.e. not in '../foo.py')"""
         spam = WordSpam()
         assert spam.get_words(0) == ["fish", "dish"]
 
