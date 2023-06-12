@@ -2,7 +2,7 @@
 
 This example walks through various ways to optimize how unit tests are built.
 
-Everything in the `tests/*.py` code hinges on where we patch tests.
+Everything in the `tests/*.py` code hinges on where we patch code under test.
 
 - Patching `random.choices()` is best in this example.  It provides predictable
   values which can be tested against. By patching `random.choices()`, we can test
