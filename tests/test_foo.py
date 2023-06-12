@@ -26,6 +26,9 @@ def test_foo_spam_get_words_01():
     """
     # Normally WordSpam().get_words() returns **random words**, but we want to
     # force it to return a predictable word list() so usage is testable...
+    #
+    # Use a context manager to patch `random.choices()` in `my_module/things.py`
+    # this context manager is called `mock_choices`.
     with patch.object(my_module.things.random, "choices") as mock_choices:
         # Yes         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ <- A) Do THIS!!!
         # Mock the return value of 'random.choices()' in 'my_module.things'
@@ -55,6 +58,9 @@ def test_foo_spam_get_words_02():
     """
     # Normally WordSpam().get_words() returns **random words**, but we want to
     # force it to return a predictable word list() so usage is testable...
+    #
+    # Use a context manager to patch `random.choices()` in `my_module/things.py`
+    # this context manager is called `mock_choices`.
     with patch("my_module.things.random.choices") as mock_choices:
         # Yes  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ <- A) Do THIS!!!
         # Mock the return value of 'random.choices()' in 'my_module.things'
@@ -69,6 +75,12 @@ def test_foo_spam_get_words_02():
         del foo
 
 @patch("my_module.things.random.choices")
+# Patch `random.choices()` in `my_module/things.py`... this
+# `@patch()` statement adds a virtual parameter called
+# `mock_choices`.
+#
+# This behavior is a bit magical and I'm not fond of the technique...
+# I prefer `patch()` as a context-manager (see above).
 def test_foo_spam_get_words_03(mock_choices):
     # A virtual parameter      ^^^^^^^^^^^^
     #
@@ -81,13 +93,6 @@ def test_foo_spam_get_words_03(mock_choices):
 
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import WordSpam'.
-
-    When compared with 'test_foo_spam_get_words_01()' and
-    'test_foo_spam_get_words_02()', I don't like this option because
-    of some of the "magical" syntax associated with '@patch()'...
-    specifically the 'mock_choices' parameter that goes with '@patch()'.
-    The 'with patch()' context manager doesn't need the magical
-    'mock_choices' parameter that '@patch()' requires.
     """
     # here we mock 'my_module.things.random.choices()'...
     mock_choices.return_value = ["fish", "dish"]
@@ -109,6 +114,9 @@ def test_wordspam_04():
     """
     # Normally WordSpam().get_words() returns **random words**, but we want to
     # force it to return a predictable word list() so usage is testable...
+    #
+    # Use a context manager to patch `WordSpam().get_words()` in
+    # `my_module/things.py`.
     with patch("my_module.things.WordSpam.get_words", return_value=["fish", "dish"]):
         # Ick  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         spam = WordSpam()
@@ -121,11 +129,16 @@ def test_wordspam_05_antipattern():
     patch stdlib 'random.choices()'.  It's better to patch it locally in your own
     module (for the best option, refer to 'test_foo_spam_get_words_01()' above...
 
-    Globally patching 'random.choices()' is considered a patch / mock
-    antipattern, because it patches python stdlib 'random.choices()' everywhere.
+    Globally patching 'random.choices()' is considered a patch antipattern, because 
+    it patches python stdlib 'random.choices()' everywhere.
     """
-    ## Try NOT to directly path python stdlib... you have no test case
-    ## isolation when patching python stdlib directly...
+    # Try NOT to directly path python stdlib... you have no test case
+    # isolation when patching python stdlib directly...
+    #
+    #
+    # Use a context manager to patch `random.choices()` globally.
+    # `patch("random.choices")` everywhere is an antipattern for normal
+    # test practice.
     with patch("random.choices") as mock_random_choices:
         # No   ^^^^^^^^^^^^^^^^ <- avoid directly patching python stdlib!
         mock_random_choices.return_value = ["fish", "dish"]
@@ -136,10 +149,10 @@ def test_wordspam_05_antipattern():
 # Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class GoodTestRandomChoices_01(TestCase):
     """
-    Good example.  Why?  Because we are testing maximum code in
-    'WordSpam().get_words()'.  This patches in the best way... it
-    changes 'my_module.things.random.choices()' (which is used by
-    'WordSpam().get_words()')to return fixed (i.e.  non-random) values.
+    Good example.  Why?  Because the `@patch()` class wrapper is patching
+    `random.choices()` in `my_module/things.py`.  This patches in the best
+    way... it changes 'my_module.things.random.choices()' (which is used by
+    'WordSpam().get_words()') to return fixed (i.e. non-random) value.
 
     Refer to the '@patch()' wrapper above to see where the patch is applied.
     """
@@ -159,10 +172,10 @@ class GoodTestRandomChoices_01(TestCase):
 # Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class GoodTestRandomChoices_02(TestCase):
     """
-    Good example.  Why?  Because we are testing maximum code in
-    'WordSpam().get_words()'.  This patches in the best way... it
-    changes 'my_module.things.random.choices()' (which is used by
-    'WordSpam().get_words()')to return fixed (i.e.  non-random) values.
+    Good example.  Why?  Because the `@patch()` class wrapper is patching
+    `random.choices()` in `my_module/things.py`.  This patches in the best
+    way... it changes 'my_module.things.random.choices()' (which is used by
+    'WordSpam().get_words()') to return fixed (i.e. non-random) value.
 
     Refer to the '@patch()' wrapper above to see where the patch is applied.
     """
@@ -188,12 +201,13 @@ class GoodTestRandomChoices_02(TestCase):
 class IckyTestWordSpam(TestCase):
     """
     Ick... this is gross.  Why?  Because we are barely testing anything in
-    'WordSpam().get_words()'.  All we did is mock 'WordSpam().get_words()'
+    'WordSpam().get_words()'.  All we did is mock `WordSpam().get_words()`
     to return a certain value.
 
-    The 'GoodTestRandomChoices_02()' class above patches in the best way... it
-    changes 'my_module.things.random.choices()' to return fixed (i.e.
-    non-random) values.
+    The `GoodTestRandomChoices_01()` and `GoodTestRandomChoices_02()` class
+    above patches in the best way... it changes
+    `my_module.things.random.choices()` to return fixed (i.e. non-random)
+    values.
 
     This class also returns fixed values, but it does so by testing much
     less code in 'WordSpam()'.
