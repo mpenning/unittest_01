@@ -1,4 +1,4 @@
-
+from typing import List
 import random
 
 class WordSpam(object):
@@ -14,7 +14,7 @@ class WordSpam(object):
             "ease", "bees", "tease", "knees", "seas", "trees",
         ]
 
-    def get_words(self, number_of_words: int=-1) -> list:
+    def get_words(self, number_of_words: int=-1) -> List[str]:
         """
         Return a list of random words.  The number of words is determined
         by the 'number_of_words' parameter.
