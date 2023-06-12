@@ -7,7 +7,7 @@ class WordSpam(object):
         """
         Boring example of code which will return some random words.
         This is a contrived object whose 'get_words()' method will
-        be mocked and tested.
+        be patched and tested.
         """
         self._words = [
             "fleas", "please", "cheese", "geez", "grease",
@@ -19,13 +19,16 @@ class WordSpam(object):
         Return a list of random words.  The number of words is determined
         by the 'number_of_words' parameter.
 
-        This method will be mocked and tested when we patch and mock
-        'random.choices()'
+        This method will be patched and tested by modifying 'random.choices()'
         """
         if number_of_words == -1:
             number_of_words = len(self._words)
-        #these_choices = random.choices(self._words, k=number_of_words)
+
+        #################################################################
+        # Begin code which should be patched in our unit tests.
         these_choices = random.choices(self._words, k=number_of_words)
+        # End code which should be patched in our unit tests.
+        #################################################################
         return these_choices
 
     def __repr__(self):
