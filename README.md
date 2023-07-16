@@ -6,20 +6,16 @@ The code we are testing is at the bottom of this README.
 
 Everything in the `tests/*.py` code hinges on where we patch code under test.
 
-- Patching `random.choices()` is best in this example.  It provides predictable
-  values which can be tested against.
-- Patching `WordSpam().get_words()` is not as good; this is because it bypasses 
-  tests of the logic contained in `get_words()`.
+- Patching `my_module.things.random.choices()` is best in this example.  It
+  provides predictable values which can be tested against.
+- Patching `my_module.things.WordSpam().get_words()` is not as good because
+  the test mock bypasses the logic contained in `get_words()`.
 
 See the docstrings and tests in `tests/test_foo.py` for more concrete explanations.
 
 ### Unittest code
 
 The following illustrate a few ways to test the code in `my_module/things.py`.
-One of the most problematic things about testing `WordSpam().get_words()` is
-that it picks words at random; random behavior makes it impossible
-to build good unit tests... consequently my tests patch `WordSpam()` such
-that it returns a predictable value.
 
 The following tests patch `random.choices()` in `my_module/things.py`.
 
