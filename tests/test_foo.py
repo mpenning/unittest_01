@@ -35,6 +35,7 @@ def test_spam_app_get_words_01():
     #
 
     # Option 1, avoid creating an explicit MagicMock() ('patch()' creates the MagicMock())
+    # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
     with patch("my_module.things.random.choices", return_value=["fish", "dish"]):
 
         # Import ../foo.py after patching 'my_module.things.random.choices()'
@@ -46,6 +47,7 @@ def test_spam_app_get_words_01():
         del foo
 
     # Option 2, create an explicit MagicMock() called 'magic_mock_choices'
+    # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
     with patch("my_module.things.random.choices") as magic_mock_choices:
         # Mock the return value of 'random.choices()' in 'my_module.things'
         magic_mock_choices.return_value = ["fish", "dish"]
@@ -65,6 +67,7 @@ class GoodTestRandomChoices_01(TestCase):
         pass
 
     def test_spam_app_get_words_02(self, *args, **kwargs):
+        # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
         with patch("my_module.things.random.choices", return_value=["fish", "dish"]):
             # Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             spam = my_module.things.WordSpam()
@@ -85,10 +88,8 @@ def test_spam_app_get_words_03():
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import '.
     """
-    # Normally ().get_words() returns **random words**, but we want to
-    # force it to return a predictable word list() so usage is testable...
-    #
     # Use a context manager to patch `random.choices()` in `my_module/things.py`
+    # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
     with patch.object(my_module.things.random, "choices", return_value=["fish", "dish"]):
         # Mock the return value of 'random.choices()' in 'my_module.things'
         #    behind the scenes, 'patch()' creates a unittest.MagicMock() instance
@@ -143,8 +144,7 @@ def test_spam_app_get_words_05():
     # Normally ().get_words() returns **random words**, but we want to
     # force it to return a predictable word list() so usage is testable...
     #
-    # Use a context manager to patch `().get_words()` in
-    # `my_module/things.py`.
+    # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
     with patch("my_module.things.WordSpam.get_words", return_value=["fish", "dish"]):
         # Ick  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         spam = WordSpam()
@@ -165,8 +165,7 @@ def test_spam_app_get_words_06_antipattern():
     #
     #
     # Use a context manager to patch `random.choices()` globally.
-    # `patch("random.choices")` everywhere is an antipattern for normal
-    # test practice.
+    # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
     with patch("random.choices") as mock_random_choices:
         # No   ^^^^^^^^^^^^^^^^ <- avoid directly patching python stdlib!
         mock_random_choices.return_value = ["fish", "dish"]
