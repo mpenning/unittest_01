@@ -39,7 +39,7 @@ def test_spam_app_get_words_01():
 
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
-        # 'spam' is an instance of 'my_module.things.()' in foo.py.
+        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside 'foo.py'...
         assert foo.spam.get_words() == ["fish", "dish"]
         # 'del foo' offers MAXIMUM test assert isolation...
@@ -53,7 +53,7 @@ def test_spam_app_get_words_01():
 
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
-        # 'spam' is an instance of 'my_module.things.()' in foo.py.
+        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside 'foo.py'...
         assert foo.spam.get_words() == ["fish", "dish"]
         # 'del foo' offers MAXIMUM test assert isolation...
@@ -95,7 +95,7 @@ def test_spam_app_get_words_03():
 
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
-        # 'spam' is an instance of 'my_module.things.()' in 'foo.py'.
+        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside 'foo.py'...
         assert foo.spam.get_words(2) == ["fish", "dish"]
         # 'del foo' offers MAXIMUM test assert isolation...
@@ -127,7 +127,7 @@ def test_spam_app_get_words_04(mock_choices):
 
     # Import ../foo.py after patching 'my_module.things.random.choices()'
     import foo
-    # 'spam' is an instance of 'my_module.things.()' in foo.py.
+    # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
     # We are testing ().get_words() inside 'foo.py'...
     assert foo.spam.get_words() == ["fish", "dish"]
     # 'del foo' offers MAXIMUM test assert isolation...
@@ -216,7 +216,7 @@ class GoodTestRandomChoices_03(TestCase):
         """Test '().get_words()' directly in ../foo.py"""
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
-        # 'spam' is an instance of 'my_module.things.()' in ../foo.py.
+        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside '../foo.py'...
         assert foo.spam.get_words() == ["fish", "dish"]
         # 'del foo' offers MAXIMUM test assert isolation...
