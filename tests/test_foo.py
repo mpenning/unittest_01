@@ -36,7 +36,7 @@ def test_spam_app_get_words_01():
 
     # Option 1, avoid creating an explicit MagicMock() ('patch()' creates the MagicMock())
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
-    with patch("my_module.things.random.choices", return_value=["fish", "dish"]):
+    with patch(target="my_module.things.random.choices", return_value=["fish", "dish"]):
 
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
@@ -48,7 +48,7 @@ def test_spam_app_get_words_01():
 
     # Option 2, create an explicit MagicMock() called 'magic_mock_choices'
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
-    with patch("my_module.things.random.choices") as magic_mock_choices:
+    with patch(target="my_module.things.random.choices") as magic_mock_choices:
         # Mock the return value of 'random.choices()' in 'my_module.things'
         magic_mock_choices.return_value = ["fish", "dish"]
         assert isinstance(magic_mock_choices, MagicMock)
@@ -68,7 +68,7 @@ class GoodTestRandomChoices_01(TestCase):
 
     def test_spam_app_get_words_02(self, *args, **kwargs):
         # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
-        with patch("my_module.things.random.choices", return_value=["fish", "dish"]):
+        with patch(target="my_module.things.random.choices", return_value=["fish", "dish"]):
             # Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             spam = my_module.things.WordSpam()
             assert spam.get_words(0) == ["fish", "dish"]
@@ -90,7 +90,7 @@ def test_spam_app_get_words_03():
     """
     # Use a context manager to patch `random.choices()` in `my_module/things.py`
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
-    with patch.object(my_module.things.random, "choices", return_value=["fish", "dish"]):
+    with patch.object(target=my_module.things.random, attribute="choices", return_value=["fish", "dish"]):
         # Mock the return value of 'random.choices()' in 'my_module.things'
         #    behind the scenes, 'patch()' creates a unittest.MagicMock() instance
 
@@ -103,7 +103,7 @@ def test_spam_app_get_words_03():
         del foo
 
 
-@patch("my_module.things.random.choices")
+@patch(target="my_module.things.random.choices")
 # Patch `random.choices()` in `my_module/things.py`... this
 # `@patch()` statement adds a virtual parameter called
 # `mock_choices`.
@@ -145,7 +145,7 @@ def test_spam_app_get_words_05():
     # force it to return a predictable word list() so usage is testable...
     #
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
-    with patch("my_module.things.WordSpam.get_words", return_value=["fish", "dish"]):
+    with patch(target="my_module.things.WordSpam.get_words", return_value=["fish", "dish"]):
         # Ick  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         spam = WordSpam()
         assert spam.get_words(0) == ["fish", "dish"]
@@ -166,14 +166,14 @@ def test_spam_app_get_words_06_antipattern():
     #
     # Use a context manager to patch `random.choices()` globally.
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
-    with patch("random.choices") as mock_random_choices:
+    with patch(target="random.choices") as mock_random_choices:
         # No   ^^^^^^^^^^^^^^^^ <- avoid directly patching python stdlib!
         mock_random_choices.return_value = ["fish", "dish"]
         spam = WordSpam()
         assert spam.get_words(0) == ["fish", "dish"]
 
 
-@patch("my_module.things.random.choices", return_value=["fish", "dish"])
+@patch(target="my_module.things.random.choices", return_value=["fish", "dish"])
 # Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class GoodTestRandomChoices_02(TestCase):
     """
@@ -196,8 +196,8 @@ class GoodTestRandomChoices_02(TestCase):
         pass
 
 
-@patch("my_module.things.random.choices", return_value=["fish", "dish"])
-# Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+@patch(target="my_module.things.random.choices", return_value=["fish", "dish"])
+# Yes:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class GoodTestRandomChoices_03(TestCase):
     """
     Good example.  Why?  Because the `@patch()` class wrapper is patching
@@ -212,7 +212,7 @@ class GoodTestRandomChoices_03(TestCase):
         pass
 
     def test_spam_app_get_words_08(self, *args, **kwargs):
-        """Test '().get_words()' directly in ../foo.py"""
+        """Test 'WordSpam().get_words()' directly in ../foo.py"""
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
@@ -224,8 +224,8 @@ class GoodTestRandomChoices_03(TestCase):
     def tearDown(self):
         pass
 
-@patch("my_module.things.WordSpam.get_words", return_value=["fish", "dish"])
-# Ick: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+@patch(target="my_module.things.WordSpam.get_words", return_value=["fish", "dish"])
+# Ick:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class IckyTest_01(TestCase):
     """
     Ick... this is gross.  Why?  Because we are barely testing anything in
