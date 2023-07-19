@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0, "../")
 
-# Even though we only import (), python can access 'my_module.things'
+# Even though we only import WordSpam(), python can access 'my_module.things'
 # because of the way that Python handles namespaces...
 from my_module.things import WordSpam
 # This 'import my_module.things' import should not be skipped... it's required
@@ -17,7 +17,7 @@ def test_spam_app_get_words_01():
     """
     The best option... patch 'random.choices()' inside
     'my_module/things.py' and then 'import foo'.  This works because
-    we patch 'random.choices()' inside 'my_module/things.py' 
+    we patch 'random.choices()' inside 'my_module/things.py'
     **before** 'import foo'.
 
     'foo.py' uses 'random.choices()' when it calls
@@ -37,7 +37,7 @@ def test_spam_app_get_words_01():
         import foo
 
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
-        # we are testing ().get_words() inside 'foo.py'...
+        # we are testing spam().get_words() inside 'foo.py'...
         assert foo.spam.get_words() == ["fish", "dish"]
         # 'del foo' offers maximum test assert isolation...
         del foo
@@ -54,7 +54,7 @@ def test_spam_app_get_words_01():
         assert isinstance(magic_mock_choices, MagicMock)
 
         # 'spam' is an instance of 'my_module.things.wordspam()' in foo.py.
-        # we are testing ().get_words() inside 'foo.py'...
+        # we are testing spam().get_words() inside 'foo.py'...
         assert foo.spam.get_words() == ["fish", "dish"]
         # 'del foo' offers maximum test assert isolation...
         del foo
@@ -68,7 +68,7 @@ class GoodTestRandomChoices_01(TestCase):
     def test_spam_app_get_words_02(self, *args, **kwargs):
         # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
         with patch(target="my_module.things.random.choices", return_value=["fish", "dish"]):
-            # Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            # Yes:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             spam = my_module.things.WordSpam()
             assert spam.get_words(0) == ["fish", "dish"]
 
@@ -173,7 +173,7 @@ def test_spam_app_get_words_06_antipattern():
 
 
 @patch(target="my_module.things.random.choices", return_value=["fish", "dish"])
-# Yes: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Yes:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class GoodTestRandomChoices_02(TestCase):
     """
     Good example.  Why?  Because the `@patch()` class wrapper is patching
