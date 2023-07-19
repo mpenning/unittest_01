@@ -2,11 +2,7 @@
 import sys
 sys.path.insert(0, "../")
 
-# Even though we only import WordSpam(), python can access 'my_module.things'
-# because of the way that Python handles namespaces...
 from my_module.things import WordSpam
-# This 'import my_module.things' import should not be skipped... it's required
-# for the 'with patch.object()' call below...
 import my_module.things
 
 from unittest.mock import patch, MagicMock
@@ -103,11 +99,8 @@ def test_spam_app_get_words_03():
 
 @patch(target="my_module.things.random.choices")
 # Patch `random.choices()` in `my_module/things.py`... this
-# `@patch()` statement adds a virtual parameter called
+# `@patch()` statement adds a magical virtual parameter called
 # `mock_choices`.
-#
-# This behavior is a bit magical and I'm not fond of the technique...
-# I prefer `patch()` as a context-manager (see above).
 def test_spam_app_get_words_04(mock_choices):
     # A virtual parameter      ^^^^^^^^^^^^
     #
