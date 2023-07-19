@@ -28,13 +28,12 @@ def test_spam_app_get_words_01():
     syntax compared with an '@patch()' wrapper.
     """
 
+    # import ../foo.py
+    import foo
 
     # Option 1, avoid creating an explicit MagicMock() ('patch()' creates the magicmock())
     # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
     with patch(target="my_module.things.random.choices", return_value=["fish", "dish"]):
-
-        # import ../foo.py
-        import foo
 
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # we are testing spam().get_words() inside 'foo.py'...
@@ -43,11 +42,12 @@ def test_spam_app_get_words_01():
         del foo
 
 
+    # import ../foo.py
+    import foo
+
     # Option 2, create an explicit MagicMock() called 'magic_mock_choices'
     # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
     with patch(target="my_module.things.random.choices") as magic_mock_choices:
-        # import ../foo.py
-        import foo
 
         # mock the return value of 'random.choices()' in 'my_module.things'
         magic_mock_choices.return_value = ["fish", "dish"]
@@ -87,14 +87,15 @@ def test_spam_app_get_words_03():
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import '.
     """
+    # Import ../foo.py
+    import foo
+
     # Use a context manager to patch `random.choices()` in `my_module/things.py`
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
     with patch.object(target=my_module.things.random, attribute="choices", return_value=["fish", "dish"]):
         # Mock the return value of 'random.choices()' in 'my_module.things'
         #    behind the scenes, 'patch()' creates a unittest.MagicMock() instance
 
-        # Import ../foo.py after patching 'my_module.things.random.choices()'
-        import foo
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside 'foo.py'...
         assert foo.spam.get_words(2) == ["fish", "dish"]
@@ -214,9 +215,11 @@ class GoodTestRandomChoices_03(TestCase):
         """Test 'WordSpam().get_words()' directly in ../foo.py"""
         # Import ../foo.py after patching 'my_module.things.random.choices()'
         import foo
+
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside '../foo.py'...
         assert foo.spam.get_words() == ["fish", "dish"]
+
         # 'del foo' offers MAXIMUM test assert isolation...
         del foo
 
