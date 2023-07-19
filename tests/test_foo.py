@@ -80,9 +80,7 @@ def test_spam_app_get_words_03():
     """
     A good option (because it doesn't use magical syntax)...
     use a 'with patch.object()' context manager to patch 'random.choices()'
-    inside 'my_module/things.py' and then 'import foo'.  This works because
-    we patch 'random.choices()' inside 'my_module/things.py' **before**
-    'import foo'.
+    inside 'my_module/things.py' and then 'import foo'.
 
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import '.
@@ -117,8 +115,7 @@ def test_spam_app_get_words_04(mock_choices):
     # parameter above (which I call 'mock_choices')
     """
     Another good option... patch 'random.choices()' inside 'my_module/things.py'
-    and then 'import foo'.  This works because we patch 'random.choices()'
-    inside 'my_module/things.py' **before** 'import foo'.
+    and then 'import foo'. 
 
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import '.
@@ -156,9 +153,6 @@ def test_spam_app_get_words_06_antipattern():
     Ick... Avoid patching the python stdlib directly; in this antipattern, we
     patch stdlib 'random.choices()'.  It's better to patch it locally in your own
     module (for the best option, refer to 'test_spam_app_get_words_01()' above...
-
-    Globally patching 'random.choices()' is considered a patch antipattern, because 
-    it patches python stdlib 'random.choices()' everywhere.
     """
     # Try NOT to directly path python stdlib... you have no test case
     # isolation when patching python stdlib directly...
