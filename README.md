@@ -22,7 +22,7 @@ The following tests patch `random.choices()` in `my_module/things.py`.
 Assume that we put the following in `tests/test_foo.py`.
 
 ```python
-from unittest.mock import patch, magicmock
+from unittest.mock import patch, MagicMock
 import sys
 sys.path.insert(0, "../")
 
@@ -31,7 +31,7 @@ def test_wordspam_01():
     # import ../foo.py
     import foo
 
-    # Option 1, avoid creating an explicit magicmock() ('patch()' creates the magicmock())
+    # Option 1, avoid creating an explicit MagicMock() ('patch()' creates the magicmock())
     # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
     with patch(target="my_module.things.random.choices", return_value=["fish", "dish"]):
 
@@ -45,13 +45,13 @@ def test_wordspam_01():
     # import ../foo.py
     import foo
 
-    # Option 2, create an explicit magicmock() called 'magic_mock_choices'
+    # Option 2, create an explicit MagicMock() called 'magic_mock_choices'
     # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
     with patch(target="my_module.things.random.choices") as magic_mock_choices:
 
         # mock the return value of 'random.choices()' in 'my_module.things'
         magic_mock_choices.return_value = ["fish", "dish"]
-        assert isinstance(magic_mock_choices, magicmock)
+        assert isinstance(magic_mock_choices, MagicMock)
 
         # 'spam' is an instance of 'my_module.things.wordspam()' in foo.py.
         # we are testing ().get_words() inside 'foo.py'...
