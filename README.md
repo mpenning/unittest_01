@@ -23,9 +23,9 @@ Assume that we put the following in `tests/test_foo.py`.
 
 ```mermaid
 sequencediagram:
-    participant test_code!node
-    participant main_code!node
-    test_code!node->>main_code!node: compare values
+    participant test_code
+    participant main_code
+    test_code->>main_code: compare values
 ```
 
 ```mermaid
