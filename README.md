@@ -26,9 +26,6 @@ sequenceDiagram
   participant Alice
   participant John
   Alice->>John: Hello John, how are you?
-  loop Testing
-    Cannot believe this output
-  end
 ```
 
 ```mermaid
