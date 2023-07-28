@@ -25,11 +25,11 @@ Assume that we put the following in `tests/test_foo.py`.
 sequenceDiagram:
     participant Development
     participant Production
-    loop
+    loop Development
         Development->>Development: Lots of effort here
     end
     Development->>Production: First release of network hw upgrade
-    loop
+    loop Production
         Production->>Production: Lots of effort here
     end
 ```
