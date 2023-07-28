@@ -21,6 +21,14 @@ The following tests patch `random.choices()` in `my_module/things.py`.
 
 Assume that we put the following in `tests/test_foo.py`.
 
+```mermaid
+flowchart LR
+
+A[foo.py
+]
+
+```
+
 ```python
 from unittest.mock import patch, MagicMock
 import sys
