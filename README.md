@@ -22,10 +22,23 @@ The following tests patch `random.choices()` in `my_module/things.py`.
 Assume that we put the following in `tests/test_foo.py`.
 
 ```mermaid
-sequencediagram:
-    participant test_code
-    participant main_code
-    test_code->>main_code: compare values
+sequenceDiagram
+Alice->>John: Hello John, how are you?
+loop Healthcheck
+    John->>John: Fight against hypochondria
+end
+Note right of John: Rational thoughts!
+John-->>Alice: Great!
+John->>Bob: How about you?
+Bob-->>John: Jolly good!sequenceDiagram
+Alice->>John: Hello John, how are you?
+loop Healthcheck
+    John->>John: Fight against hypochondria
+end
+Note right of John: Rational thoughts!
+John-->>Alice: Great!
+John->>Bob: How about you?
+Bob-->>John: Jolly good!
 ```
 
 ```mermaid
