@@ -22,50 +22,69 @@ The following tests patch `random.choices()` in `my_module/things.py`.
 Assume that we put the following in `tests/test_foo.py`.
 
 ```mermaid
-flowchart LR
+sequencediagram:foo
+    participant test_code>node
+    participant main_code>node
+    test_code>node->>main_code>node: compare values
+```
 
-A[foo.py
-]
+```mermaid
+flowchart TD
+
+A[uut is foo.py] --> |import my_module.things|
 
 ```
 
 ```python
+# Filename: tests/test_foo.py
 from unittest.mock import patch, MagicMock
 import sys
 sys.path.insert(0, "../")
 
-def test_wordspam_01():
+def test_spam_app_get_words_01():
+    """
+    The best option... patch 'random.choices()' inside
+    'my_module/things.py' and then 'import foo as uut'.  This works because
+    we patch 'random.choices()' inside 'my_module/things.py'
+    **before** 'import foo'.
+
+    'foo.py' uses 'random.choices()' when it calls
+    'from my_module.things import random'.
+
+    I like 'with patch()' as a context manager instead of an '@patch()'
+    wrapper.  The 'with patch()' context manager has less magical
+    syntax compared with an '@patch()' wrapper.
+    """
 
     # import ../foo.py
     import foo as uut
 
     # Option 1, avoid creating an explicit MagicMock() ('patch()' creates the magicmock())
-    # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
+    # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
     with patch(target="my_module.things.random.choices", return_value=["fish", "dish"]):
 
-
-        # 'spam' is an instance of 'my_module.things.WordSpam()' in 'foo.py'.
+        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # we are testing spam().get_words() inside 'foo.py'...
         assert uut.spam.get_words() == ["fish", "dish"]
-        # 'del uut' (i.e. foo.py) offers maximum test assert isolation...
+        # 'del uut' (i.e. ../foo.py) offers maximum test assert isolation...
         del uut
+
 
     # import ../foo.py
     import foo as uut
 
     # Option 2, create an explicit MagicMock() called 'magic_mock_choices'
-    # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
+    # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
     with patch(target="my_module.things.random.choices") as magic_mock_choices:
 
         # mock the return value of 'random.choices()' in 'my_module.things'
         magic_mock_choices.return_value = ["fish", "dish"]
         assert isinstance(magic_mock_choices, MagicMock)
 
-        # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
-        # we are testing foo.spam().get_words() inside 'foo.py'...
+        # 'spam' is an instance of 'my_module.things.wordspam()' in foo.py.
+        # we are testing spam().get_words() inside 'foo.py'...
         assert uut.spam.get_words() == ["fish", "dish"]
-
-        # 'del uut' (i.e. foo.py) offers maximum test assert isolation...
+        # 'del uut' (i.e. ../foo.py) offers maximum test assert isolation...
         del uut
 
 ```
