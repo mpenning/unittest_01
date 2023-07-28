@@ -29,7 +29,7 @@ sys.path.insert(0, "../")
 def test_wordspam_01():
 
     # import ../foo.py
-    import foo
+    import foo as uut
 
     # Option 1, avoid creating an explicit MagicMock() ('patch()' creates the magicmock())
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
@@ -38,12 +38,12 @@ def test_wordspam_01():
 
         # 'spam' is an instance of 'my_module.things.WordSpam()' in 'foo.py'.
         # we are testing spam().get_words() inside 'foo.py'...
-        assert foo.spam.get_words() == ["fish", "dish"]
-        # 'del foo' offers maximum test assert isolation...
-        del foo
+        assert uut.spam.get_words() == ["fish", "dish"]
+        # 'del uut' (i.e. foo.py) offers maximum test assert isolation...
+        del uut
 
     # import ../foo.py
-    import foo
+    import foo as uut
 
     # Option 2, create an explicit MagicMock() called 'magic_mock_choices'
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
@@ -55,9 +55,10 @@ def test_wordspam_01():
 
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # we are testing foo.spam().get_words() inside 'foo.py'...
-        assert foo.spam.get_words() == ["fish", "dish"]
-        # 'del foo' offers maximum test assert isolation...
-        del foo
+        assert uut.spam.get_words() == ["fish", "dish"]
+
+        # 'del uut' (i.e. foo.py) offers maximum test assert isolation...
+        del uut
 
 ```
 
