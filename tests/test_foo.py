@@ -1,4 +1,5 @@
 
+import configparser
 import sys
 sys.path.insert(0, "../")
 
@@ -9,10 +10,48 @@ from unittest.mock import patch, MagicMock
 from unittest import TestCase
 import random
 
+
+def test_config_ini_01():
+    """
+    test whether configparser from stdlib gets expected values.
+    """
+    conf_obj = configparser.ConfigParser()
+    # read the ini configuration from a file named "test_config.ini"
+    #conf_obj.read("./test_config.ini")
+
+    # read the ini configuration string instead of reading from a file...
+    conf_obj.read_string("""
+    [global]
+    username=mpenning
+    ip_address=192.0.2.1
+
+    [development]
+    username=dpenning
+    ip_address=192.0.2.2
+    """)
+
+    # Define expected results here...
+    expected = {
+        "global": {
+            "username": "mpenning",
+            "ip_address": "192.0.2.1",
+        },
+        "development": {
+            "username": "dpenning",
+            "ip_address": "192.0.2.2",
+        },
+    }
+
+    uut = conf_obj
+    assert uut["global"]["username"] == expected["global"]["username"]
+    assert uut["global"]["ip_address"] == expected["global"]["ip_address"]
+    assert uut["development"]["username"] == expected["development"]["username"]
+    assert uut["development"]["ip_address"] == expected["development"]["ip_address"]
+
 def test_spam_app_get_words_01():
     """
     The best option... patch 'random.choices()' inside
-    'my_module/things.py' and then 'import foo'.  This works because
+    'my_module/things.py' and then 'import foo as uut'.  This works because
     we patch 'random.choices()' inside 'my_module/things.py'
     **before** 'import foo'.
 
@@ -25,7 +64,7 @@ def test_spam_app_get_words_01():
     """
 
     # import ../foo.py
-    import foo
+    import foo as uut
 
     # Option 1, avoid creating an explicit MagicMock() ('patch()' creates the magicmock())
     # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
@@ -33,13 +72,13 @@ def test_spam_app_get_words_01():
 
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # we are testing spam().get_words() inside 'foo.py'...
-        assert foo.spam.get_words() == ["fish", "dish"]
-        # 'del foo' offers maximum test assert isolation...
-        del foo
+        assert uut.spam.get_words() == ["fish", "dish"]
+        # 'del uut' (i.e. ../foo.py) offers maximum test assert isolation...
+        del uut
 
 
     # import ../foo.py
-    import foo
+    import foo as uut
 
     # Option 2, create an explicit MagicMock() called 'magic_mock_choices'
     # 'foo.py' -> 'my_module.things.wordspam()' -> my_module.things.random.choices()
@@ -51,9 +90,9 @@ def test_spam_app_get_words_01():
 
         # 'spam' is an instance of 'my_module.things.wordspam()' in foo.py.
         # we are testing spam().get_words() inside 'foo.py'...
-        assert foo.spam.get_words() == ["fish", "dish"]
-        # 'del foo' offers maximum test assert isolation...
-        del foo
+        assert uut.spam.get_words() == ["fish", "dish"]
+        # 'del uut' (i.e. ../foo.py) offers maximum test assert isolation...
+        del uut
 
 
 class GoodTestRandomChoices_01(TestCase):
@@ -65,8 +104,8 @@ class GoodTestRandomChoices_01(TestCase):
         # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
         with patch(target="my_module.things.random.choices", return_value=["fish", "dish"]):
             # Yes:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-            spam = my_module.things.WordSpam()
-            assert spam.get_words(0) == ["fish", "dish"]
+            uut = my_module.things.WordSpam()
+            assert uut.get_words(0) == ["fish", "dish"]
 
     def tearDown(self):
         pass
@@ -82,7 +121,7 @@ def test_spam_app_get_words_03():
     'from my_module.things import '.
     """
     # Import ../foo.py
-    import foo
+    import foo as uut
 
     # Use a context manager to patch `random.choices()` in `my_module/things.py`
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
@@ -92,9 +131,9 @@ def test_spam_app_get_words_03():
 
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside 'foo.py'...
-        assert foo.spam.get_words(2) == ["fish", "dish"]
-        # 'del foo' offers MAXIMUM test assert isolation...
-        del foo
+        assert uut.spam.get_words(2) == ["fish", "dish"]
+        # 'del uut' (i.e. ../foo.py) offers maximum test assert isolation...
+        del uut
 
 
 @patch(target="my_module.things.random.choices")
@@ -108,7 +147,7 @@ def test_spam_app_get_words_04(mock_choices):
     # parameter above (which I call 'mock_choices')
     """
     Another good option... patch 'random.choices()' inside 'my_module/things.py'
-    and then 'import foo'. 
+    and then 'import foo'.
 
     'foo.py' uses 'random.choices()' when it calls
     'from my_module.things import '.
@@ -117,12 +156,12 @@ def test_spam_app_get_words_04(mock_choices):
     mock_choices.return_value = ["fish", "dish"]
 
     # Import ../foo.py after patching 'my_module.things.random.choices()'
-    import foo
+    import foo as uut
     # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
     # We are testing ().get_words() inside 'foo.py'...
-    assert foo.spam.get_words() == ["fish", "dish"]
-    # 'del foo' offers MAXIMUM test assert isolation...
-    del foo
+    assert uut.spam.get_words() == ["fish", "dish"]
+    # 'del uut' (i.e. ../foo.py) offers maximum test assert isolation...
+    del uut
 
 
 def test_spam_app_get_words_05():
@@ -137,8 +176,8 @@ def test_spam_app_get_words_05():
     # 'foo.py' -> 'my_module.things.WordSpam()' -> my_module.things.random.choices()
     with patch(target="my_module.things.WordSpam.get_words", return_value=["fish", "dish"]):
         # Ick  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        spam = WordSpam()
-        assert spam.get_words(0) == ["fish", "dish"]
+        uut = WordSpam()
+        assert uut.get_words(0) == ["fish", "dish"]
 
 
 def test_spam_app_get_words_06_antipattern():
@@ -156,8 +195,8 @@ def test_spam_app_get_words_06_antipattern():
     with patch(target="random.choices") as mock_random_choices:
         # No   ^^^^^^^^^^^^^^^^ <- avoid directly patching python stdlib!
         mock_random_choices.return_value = ["fish", "dish"]
-        spam = WordSpam()
-        assert spam.get_words(0) == ["fish", "dish"]
+        uut = WordSpam()
+        assert uut.get_words(0) == ["fish", "dish"]
 
 
 @patch(target="my_module.things.random.choices", return_value=["fish", "dish"])
@@ -176,8 +215,8 @@ class GoodTestRandomChoices_02(TestCase):
         pass
 
     def test_spam_app_get_words_07(self, *args, **kwargs):
-        spam = WordSpam()
-        assert spam.get_words(0) == ["fish", "dish"]
+        uut = WordSpam()
+        assert uut.get_words(0) == ["fish", "dish"]
 
     def tearDown(self):
         pass
@@ -201,14 +240,14 @@ class GoodTestRandomChoices_03(TestCase):
     def test_spam_app_get_words_08(self, *args, **kwargs):
         """Test 'WordSpam().get_words()' directly in ../foo.py"""
         # Import ../foo.py after patching 'my_module.things.random.choices()'
-        import foo
+        import foo as uut
 
         # 'spam' is an instance of 'my_module.things.WordSpam()' in foo.py.
         # We are testing ().get_words() inside '../foo.py'...
-        assert foo.spam.get_words() == ["fish", "dish"]
+        assert uut.spam.get_words() == ["fish", "dish"]
 
-        # 'del foo' offers MAXIMUM test assert isolation...
-        del foo
+        # 'del uut' (i.e. ../foo.py) offers maximum test assert isolation...
+        del uut
 
     def tearDown(self):
         pass
@@ -235,8 +274,8 @@ class IckyTest_01(TestCase):
 
     def test_spam_app_get_words_09(self, *args, **kwargs):
         """Test '().get_words()' (i.e. not in '../foo.py')"""
-        spam = WordSpam()
-        assert spam.get_words(0) == ["fish", "dish"]
+        uut = WordSpam()
+        assert uut.get_words(0) == ["fish", "dish"]
 
     def tearDown(self):
         pass
