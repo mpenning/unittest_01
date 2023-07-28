@@ -23,9 +23,12 @@ Assume that we put the following in `tests/test_foo.py`.
 
 ```mermaid
 sequenceDiagram
-  participant Alice
-  participant John
-  Alice->>John: Hello John, how are you?
+    participant Alice
+    participant John
+    Alice->>John: Hello John, how are you?
+    loop Foo
+        John->>John: Fancy this event!
+    end
 ```
 
 ```mermaid
