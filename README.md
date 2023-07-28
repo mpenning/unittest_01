@@ -22,9 +22,12 @@ The following tests patch `random.choices()` in `my_module/things.py`.
 Assume that we put the following in `tests/test_foo.py`.
 
 ```mermaid
-sequenceDiagram: Test Mermaid Markdown
+sequenceDiagram:
     participant Development
     participant Production
+    loop
+        Development->>Development: Lots of effort here
+    end
     Development->>Production: First release of network hw upgrade
     loop
         Production->>Production: Lots of effort here
