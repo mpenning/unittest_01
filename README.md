@@ -30,7 +30,7 @@ sequenceDiagram:
     end
     Development->>Production: First release of network hw upgrade
     loop Production
-        Production->>Production: Lots of effort here
+        Production->>Production: More effort here
     end
 ```
 
