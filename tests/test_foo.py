@@ -16,7 +16,9 @@ def test_config_ini_01():
     test whether configparser from stdlib gets expected values.
     """
     conf_obj = configparser.ConfigParser()
-    # read the ini configuration from a file named "test_config.ini"
+
+    # Deprecated: read the ini config from a file named "./test_config.ini"...
+    #
     #conf_obj.read("./test_config.ini")
 
     # read the ini configuration string instead of reading from a file...
